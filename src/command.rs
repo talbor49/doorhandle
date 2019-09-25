@@ -4,7 +4,7 @@ use std::str::from_utf8;
 
 use byteorder::{BigEndian, WriteBytesExt};
 use rustdoor::communication::messages::{
-    MESSAGE_LENGTH_SIZE, MESSAGE_TYPE_SIZE, MessageType, RunCommandRequest, RunCommandResponse,
+    MessageType, RunCommandRequest, RunCommandResponse, MESSAGE_LENGTH_SIZE, MESSAGE_TYPE_SIZE,
 };
 use rustdoor::communication::serialization::get_msg_type_and_length;
 
@@ -23,7 +23,7 @@ fn make_run_command_request_buffer(command: String, async_run: bool) -> Vec<u8> 
     buffer
 }
 
-fn handle_response(message: &[u8], msg_length: usize, msg_type: u8) {
+fn handle_response(message: &[u8], msg_type: u8) {
     println!("Response got: {:?}", message);
     if msg_type == MessageType::RunCommandType as u8 {
         let response: RunCommandResponse = ron::de::from_bytes(message).unwrap();
@@ -47,13 +47,13 @@ pub fn run_command(command: String, mut stream: &TcpStream) -> Result<(), Error>
             0 => false,
             _ => {
                 let (msg_type, msg_length) = get_msg_type_and_length(type_and_length);
-
                 let mut message = vec![0; msg_length];
-                let size = stream
-                    .read(&mut message)
+
+                // Read_exact function guarantees that we will read exactly enough data to fill the buffer
+                stream
+                    .read_exact(&mut message)
                     .expect("Could not read message after getting message metadata. Error: {}");
-                // read function guarantees that we will read all data
-                handle_response(&message, msg_length, msg_type);
+                handle_response(&message, msg_type);
                 true
             }
         },
