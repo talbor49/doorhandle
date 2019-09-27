@@ -1,7 +1,5 @@
 use byteorder::{BigEndian, WriteBytesExt};
-use rustdoor::communication::messages::{
-    MessageType, RunCommandRequest, MESSAGE_LENGTH_SIZE, MESSAGE_TYPE_SIZE,
-};
+use rustdoor::communication::messages::{MessageType, RunCommandRequest, MESSAGE_HEADER_LENGTH};
 use std::io::{Error, Write};
 use std::net::TcpStream;
 
@@ -14,8 +12,7 @@ fn make_run_command_request_buffer(command: String, async_run: bool) -> Vec<u8> 
     let message_type = MessageType::RunCommandType as u8;
     let message_len = serialized_message.len();
 
-    let mut buffer: Vec<u8> =
-        Vec::with_capacity(message_len + MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE);
+    let mut buffer: Vec<u8> = Vec::with_capacity(message_len + MESSAGE_HEADER_LENGTH);
     buffer.push(message_type);
     buffer.write_u32::<BigEndian>(message_len as u32).unwrap();
     buffer.extend(serialized_message.into_bytes());

