@@ -1,15 +1,15 @@
-use std::io::{Error, Read, Write};
-use std::net::{Shutdown, TcpStream};
-use std::str::from_utf8;
+use std::io::{Error};
+use std::net::{TcpStream};
 
-use byteorder::{BigEndian, WriteBytesExt};
+
+
 use rustdoor::communication::messages::{
     Message, MessageType, MessageTypes, RunCommandRequest, RunCommandResponse,
     MESSAGE_HEADER_LENGTH,
 };
 use rustdoor::communication::server::get_message;
-use std::sync::mpsc::TryRecvError;
-use std::sync::mpsc::TryRecvError::Disconnected;
+
+
 
 fn handle_response(message: Message) {
     println!("Response got: {:?}", message);

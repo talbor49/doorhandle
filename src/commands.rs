@@ -1,4 +1,4 @@
-use byteorder::{BigEndian, WriteBytesExt};
+
 use rustdoor::communication::messages::{
     MessageType, MessageTypes, RunCommandRequest, MESSAGE_HEADER_LENGTH,
 };
@@ -20,7 +20,7 @@ pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<(), Er
     stream.write_all(&msg).unwrap();
     println!("Sent message, awaiting reply...");
 
-    let response = get_response(&mut stream);
+    let _response = get_response(&mut stream);
 
     Ok(())
 }
