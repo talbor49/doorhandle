@@ -1,6 +1,6 @@
 
 use rustdoor::communication::messages::{
-    MessageType, MessageTypes, RunCommandRequest, MESSAGE_HEADER_LENGTH,
+    RunCommandRequest
 };
 use std::io::{Error, Write};
 use std::net::TcpStream;

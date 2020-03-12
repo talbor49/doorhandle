@@ -4,8 +4,7 @@ use std::net::{TcpStream};
 
 
 use rustdoor::communication::messages::{
-    Message, MessageType, MessageTypes, RunCommandRequest, RunCommandResponse,
-    MESSAGE_HEADER_LENGTH,
+    Message, MessageTypes, RunCommandResponse
 };
 use rustdoor::communication::server::get_message;
 
