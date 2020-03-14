@@ -36,7 +36,7 @@ pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<(), Er
     Ok(())
 }
 
-pub fn download_file(remote_path: String, local_path: String, mut stream: &mut TcpStream) -> Result<(), Error> {
+pub fn download_file(remote_path: String, _local_path: String, mut stream: &mut TcpStream) {
     let req = DownloadFileRequest {
         path: remote_path
     };
@@ -49,7 +49,4 @@ pub fn download_file(remote_path: String, local_path: String, mut stream: &mut T
     let response: DownloadFileResponse = ron::de::from_bytes(&response.serialized_message).expect("Could not deserialize message");
     println!("File data: {}", std::str::from_utf8(&response.file_data).unwrap());
     println!("Error info: {:?}", response.error_info);
-
-
-    Ok(())
 }
