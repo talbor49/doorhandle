@@ -1,8 +1,8 @@
 use std::io::{Error, ErrorKind};
-use std::net::{TcpStream};
+use std::net::TcpStream;
 use structopt::StructOpt;
 
-use crate::commands::{run_command, download_file};
+use crate::commands::{download_file, run_command};
 
 #[derive(StructOpt)]
 #[structopt(name = "DownloadFileAction")]
@@ -10,7 +10,7 @@ struct DownloadFileAction {
     /// Remote path of file to download
     remote_path: String,
     /// Local path to save file after download
-    local_path: String
+    local_path: String,
 }
 
 fn print_general_help() {
@@ -26,7 +26,7 @@ pub fn handle_user_command(user_command: &str, stream: &mut TcpStream) -> Result
     match keywords[0] {
         "exit" => {
             return Err(Error::new(ErrorKind::InvalidInput, "User typed exit"));
-        },
+        }
         "help" => {
             print_general_help();
         }
@@ -37,7 +37,7 @@ pub fn handle_user_command(user_command: &str, stream: &mut TcpStream) -> Result
                 let command_to_execute = keywords[1..].join(" ");
                 run_command(command_to_execute, stream).expect("Error while running command");
             }
-        },
+        }
         "download" => {
             match DownloadFileAction::from_iter_safe(&keywords) {
                 Ok(action) => {
@@ -50,7 +50,7 @@ pub fn handle_user_command(user_command: &str, stream: &mut TcpStream) -> Result
             }
 
             // run_command(command_to_execute, stream).expect("Error while running command");
-        },
+        }
         _ => {
             if keywords[0].len() > 0 {
                 print_general_help();
