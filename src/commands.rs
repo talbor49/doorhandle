@@ -39,7 +39,7 @@ pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<RunCom
     println!("Output: {:?} ", &response.output);
     println!("Error info: {:?}", response.error_info);
 
-    if response.error_info.is_some() {
+    if response.error_info.is_none() {
         Ok(response)
     } else {
         Err(response.error_info.unwrap())
