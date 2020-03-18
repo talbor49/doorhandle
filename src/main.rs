@@ -30,14 +30,10 @@ fn run_cli_prompt(stream: &mut TcpStream) -> io::Result<()> {
         io::stdin().read_line(&mut user_command)?;
         user_command = user_command.trim().to_string();
 
-        if user_command.len() > 0 {
+        if !user_command.is_empty() {
             match handle_user_command(&user_command, stream) {
                 Ok(_) => {}
-                Err(error) => match error.kind() {
-                    // This error is raised when the user enters "exit"
-                    ErrorKind::InvalidInput => return Ok(()),
-                    _ => {}
-                },
+                Err(error) => if ErrorKind::InvalidInput == error.kind() { return Ok(()) },
             }
         }
 
