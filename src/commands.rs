@@ -7,7 +7,7 @@ use spyware::communication::messages::DownloadFileRequest;
 use spyware::communication::serialization::serialize_message;
 use spyware::communication::server::get_message;
 
-fn send_request(req: impl Serialize + MessageType, stream: &mut TcpStream) -> Result<(), Error> {
+pub fn send_request(req: impl Serialize + MessageType, stream: &mut TcpStream) -> Result<(), Error> {
     let msg = serialize_message(req).unwrap();
 
     println!("Sending buffer {:?}", msg);
