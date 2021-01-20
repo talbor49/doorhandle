@@ -33,7 +33,11 @@ fn run_cli_prompt(stream: &mut TcpStream) -> io::Result<()> {
         if !user_command.is_empty() {
             match handle_user_command(&user_command, stream) {
                 Ok(_) => {}
-                Err(error) => if ErrorKind::InvalidInput == error.kind() { return Ok(()) },
+                Err(error) => {
+                    if ErrorKind::InvalidInput == error.kind() {
+                        return Ok(());
+                    }
+                }
             }
         }
 

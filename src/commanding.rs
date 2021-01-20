@@ -2,7 +2,7 @@ use std::io::{Error, ErrorKind};
 use std::net::TcpStream;
 use structopt::StructOpt;
 
-use crate::commands::{download_file, run_command, get_spyware_logs};
+use crate::commands::{download_file, get_spyware_logs, run_command};
 
 #[derive(StructOpt)]
 #[structopt(name = "DownloadFileAction")]
